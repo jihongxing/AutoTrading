@@ -1,0 +1,163 @@
+# BTC 自动交易系统 - Docker Compose
+version: '3.8'
+
+services:
+  # 主应用
+  trading-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: btc-trading-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - LOG_LEVEL=INFO
+      - QUESTDB_HOST=questdb
+      - QUESTDB_PORT=9000
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - API_KEY_DEV=dev-key-001
+      - API_KEY_ADMIN=admin-key-001
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config:ro
+      - trading-data:/app/data
+      - trading-logs:/app/logs
+    depends_on:
+      questdb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # QuestDB 时序数据库
+  questdb:
+    image: questdb/questdb:7.3.10
+    container_name: btc-questdb
+    ports:
+      - "9000:9000"   # REST API / Web Console
+      - "9009:9009"   # InfluxDB Line Protocol
+      - "8812:8812"   # PostgreSQL Wire Protocol
+    environment:
+      - QDB_CAIRO_COMMIT_LAG=1000
+      - QDB_SHARED_WORKER_COUNT=2
+      - QDB_HTTP_ENABLED=true
+    volumes:
+      - questdb-data:/var/lib/questdb
+    restart: unless-stopped
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Kafka 消息队列
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: btc-kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    restart: unless-stopped
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis 缓存
+  redis:
+    image: redis:7-alpine
+    container_name: btc-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Kafka UI（可选，用于监控）
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: btc-kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=btc-trading
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - trading-network
+    profiles:
+      - monitoring
+
+  # 前端
+  trading-web:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8000
+        - VITE_WS_URL=ws://localhost:8000
+    container_name: btc-trading-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - trading-api
+    restart: unless-stopped
+    networks:
+      - trading-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  trading-network:
+    driver: bridge
+
+volumes:
+  trading-data:
+  trading-logs:
+  questdb-data:
+  kafka-data:
+  redis-data:

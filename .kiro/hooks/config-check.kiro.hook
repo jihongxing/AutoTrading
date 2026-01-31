@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "配置参数检查",
+  "description": "当配置文件被编辑时，检查参数是否在允许范围内",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "config/**/*.yaml"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检查配置文件修改是否合规：\n1. L2参数（风控阈值）是否在允许范围内\n2. 是否有硬编码的L3参数（应在数据库）\n3. 格式是否正确\n\n参考 docs/规范/交易参数与风控规范.md 中的允许范围。"
+  }
+}

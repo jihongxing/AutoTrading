@@ -1,0 +1,25 @@
+# 执行层配置
+
+retry:
+  max_retries: 3
+  base_delay_ms: 100
+  max_delay_ms: 5000
+  exponential: true
+
+timeout:
+  order_submit_ms: 5000
+  order_confirm_ms: 30000
+  cancel_ms: 10000
+
+exchange:
+  primary: binance
+  backup: null
+  api_rate_limit: 1200  # 每分钟请求数
+
+slippage:
+  max_allowed: 0.005    # 最大允许滑点 0.5%
+  warning_threshold: 0.003
+
+position:
+  sync_interval_seconds: 60
+  max_pending_orders: 5

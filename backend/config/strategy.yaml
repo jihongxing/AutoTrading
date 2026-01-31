@@ -1,0 +1,34 @@
+# BTC 自动交易系统 — 策略配置 (L1)
+
+# 证人权重配置
+weights:
+  # TIER_1 核心证人
+  volatility_release:
+    base_weight: 1.0
+  range_break:
+    base_weight: 1.0
+  
+  # TIER_2 辅助证人
+  time_structure:
+    base_weight: 0.8
+  volatility_asymmetry:
+    base_weight: 0.8
+  liquidity_sweep:
+    base_weight: 0.9
+  microstructure:
+    base_weight: 0.7
+  
+  # TIER_3 否决证人（权重不影响否决逻辑）
+  risk_sentinel:
+    base_weight: 1.0
+  macro_sentinel:
+    base_weight: 1.0
+
+# 聚合参数
+aggregation:
+  # TIER_2 基础影响因子
+  tier2_base_factor: 0.1
+  # 置信度阈值
+  confidence_threshold: 0.6
+  # 最小证人数量
+  min_witnesses: 2

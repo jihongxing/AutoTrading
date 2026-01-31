@@ -1,0 +1,32 @@
+# 风控配置（L2 层级）
+# 修改需要审批，自学习禁止触碰
+
+account_risk:
+  max_drawdown: 0.20           # 最大回撤 20%
+  daily_max_loss: 0.03         # 单日最大亏损 3%
+  weekly_max_loss: 0.10        # 周最大亏损 10%
+  consecutive_loss_cooldown: 3 # 连续亏损 3 次进入冷却
+
+market_risk:
+  volatility_threshold_multiplier: 2.0  # 波动率阈值倍数
+  liquidity_threshold: 0.005            # 流动性阈值
+  extreme_volatility_threshold: 0.10    # 极端波动阈值 10%
+
+position:
+  max_single_position: 0.05    # 单笔最大仓位 5%
+  max_total_position: 0.30     # 总仓位上限 30%
+  max_leverage: 5              # 最大杠杆
+
+execution:
+  max_slippage: 0.005          # 最大滑点 0.5%
+  min_fill_rate: 0.95          # 最小成交率 95%
+  max_latency_ms: 1000         # 最大延迟 1s
+
+cooldown:
+  normal_seconds: 600          # 普通冷却 10 分钟
+  stop_loss_seconds: 1200      # 止损冷却 20 分钟
+  consecutive_loss_seconds: 3600  # 连续亏损冷却 1 小时
+
+recovery:
+  auto_unlock_hours: 24        # 自动解锁等待时间
+  degraded_position_ratio: 0.5 # 降级运行仓位比例

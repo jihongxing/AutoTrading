@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "项目结构检查",
+  "description": "当新建 Python 文件时，检查文件位置和命名是否符合项目结构规范",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "src/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "检查新建文件是否符合项目结构规范：\n1. 文件位置是否正确（core/strategy/data/learning/api/common）\n2. 命名是否符合规范（strategy_*.py, risk_*.py 等）\n3. 模块职责是否清晰\n\n如不符合，建议正确的位置和命名。"
+  }
+}

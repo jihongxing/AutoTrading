@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.egg-info
+dist
+build
+
+# 虚拟环境
+.venv
+venv
+ENV
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# 测试
+tests/
+htmlcov/
+.coverage
+coverage.xml
+
+# 文档
+docs/
+*.md
+!README.md
+
+# 本地配置
+.env
+.env.local
+*.local.yaml
+
+# 日志和数据
+logs/
+data/
+*.log
+
+# 其他
+.DS_Store
+Thumbs.db

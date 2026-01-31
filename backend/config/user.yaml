@@ -1,0 +1,44 @@
+# 用户模块配置 (L1)
+
+# JWT 配置
+jwt:
+  secret: "${JWT_SECRET:btc-trading-secret-key-change-in-production}"
+  algorithm: "HS256"
+  access_token_expire_minutes: 60
+  refresh_token_expire_days: 7
+
+# 密码策略
+password:
+  min_length: 8
+  max_length: 128
+  require_uppercase: false
+  require_number: false
+
+# 订阅计划
+plans:
+  free:
+    fee_rate: 0.30
+    max_position_pct: 0.05
+    trial_days: 7
+    monthly_price: 0
+  basic:
+    fee_rate: 0.20
+    max_position_pct: 0.15
+    trial_days: 0
+    monthly_price: 29
+  pro:
+    fee_rate: 0.10
+    max_position_pct: 0.30
+    trial_days: 0
+    monthly_price: 99
+
+# 安全配置
+security:
+  api_key_encryption: "AES-256-GCM"
+  max_login_attempts: 5
+  lockout_duration_minutes: 30
+
+# 限制
+limits:
+  max_users: 100
+  max_exchange_configs_per_user: 1
